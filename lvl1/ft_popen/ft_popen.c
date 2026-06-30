@@ -30,7 +30,7 @@ int ft_popen(const char *file, const char *av[], char type)
 		}
 		else if (type == 'w')
 		{
-			dup2(pipefd[1], STDIN_FILENO);
+			dup2(pipefd[0], STDIN_FILENO);
 			close(pipefd[0]);
 			close(pipefd[1]);
 		}
@@ -50,5 +50,4 @@ int ft_popen(const char *file, const char *av[], char type)
 			return(pipefd[1]);
 		}
 	}
-	
 }
