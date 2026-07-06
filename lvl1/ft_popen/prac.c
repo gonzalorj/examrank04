@@ -7,18 +7,19 @@ int ft_popen(const char *file, const char *av[], char type)
 {
     int pipefd[2];
     pid_t pid;
+
     if(!file || !av || type != 'r' && type != 'w')
-        return 1;
+        return -1;
     if(pipe(pipefd) == -1)
         return -1;
     pid = fork();
-    if(pid == -1)
+    if (pid == -1)
     {
-        close(pipefd[1]);
         close(pipefd[0]);
-        return 1;
+        close(pipefd[1]);
+        return -1;
     }
-    if(pid == -1)
+    if(pid == 0)
     {
         if(type == 'r')
         {
@@ -34,5 +35,18 @@ int ft_popen(const char *file, const char *av[], char type)
         }
         execvp(file, (char * const *)av);
         exit(1);
+    }
+    else
+    {
+         if(type == 'r')
+        {
+            close(pipefd[1]);
+            return(pipefd[0]);
+        }
+        else
+        {
+            close(pipefd[0]);
+            return(pipefd[1]);
+        }
     }
 }

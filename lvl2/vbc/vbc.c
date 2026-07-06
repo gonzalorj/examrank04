@@ -1,77 +1,59 @@
 #include "given.h"
 
-/* --- Implementación del Parser (Tu Parte) --- */
-
-// Prototipos necesarios para la recursividad
 node *parse_sum(char **s);
 
-// Nivel 3: Factores (Números y Paréntesis)
-// Prioridad máxima. Un factor es un número O una expresión entre paréntesis.
+
 node *parse_factor(char **s)
 {
     node *n = NULL;
 
-    // Caso 1: Paréntesis '('
     if (accept(s, '('))
     {
-        n = parse_sum(s); // Volvemos a empezar la jerarquía dentro del paréntesis
-        if (!n) return (NULL); // Si falló lo de dentro, propagamos error
-        
-        // Esperamos obligatoriamente el cierre
+        n = parse_sum(s);
+        if (!n) return (NULL); 
         if (!expect(s, ')'))
         {
-            destroy_tree(n); // Limpiamos lo que habíamos creado
+            destroy_tree(n);
             return (NULL);
         }
         return (n);
     }
-
-    // Caso 2: Números (0-9)
     if (isdigit(**s))
     {
-        // Creamos un nodo tipo VALor
         node tmp = {VAL, **s - '0', NULL, NULL};
         n = new_node(tmp);
-        (*s)++; // Avanzamos el puntero del string
+        (*s)++;
         return (n);
     }
-
-    // Si no es ni '(' ni número, es un error
     unexpected(**s);
     return (NULL);
 }
 
-// Nivel 2: Términos (Multiplicación)
-// Un término es: Factor * Factor * ...
 node *parse_term(char **s)
 {
-    node *lhs = parse_factor(s); // Lado izquierdo (Left Hand Side)
+    node *lhs = parse_factor(s);
     if (!lhs) return (NULL);
 
-    while (accept(s, '*')) // Mientras encontremos multiplicaciones
+    while (accept(s, '*'))
     {
-        node *rhs = parse_factor(s); // Lado derecho (Right Hand Side)
+        node *rhs = parse_factor(s);
         if (!rhs)
         {
             destroy_tree(lhs);
             return (NULL);
         }
-
-        // Creamos nodo padre MULTI que conecta lhs y rhs
         node tmp = {MULTI, 0, lhs, rhs};
-        lhs = new_node(tmp); // El nuevo nodo pasa a ser el lhs para la siguiente vuelta
+        lhs = new_node(tmp);
     }
     return (lhs);
 }
 
-// Nivel 1: Expresiones (Sumas)
-// Una expresión es: Término + Término + ...
 node *parse_sum(char **s)
 {
-    node *lhs = parse_term(s); // Obtenemos el término (que ya procesó multiplicaciones)
+    node *lhs = parse_term(s);
     if (!lhs) return (NULL);
 
-    while (accept(s, '+')) // Mientras encontremos sumas
+    while (accept(s, '+'))
     {
         node *rhs = parse_term(s);
         if (!rhs)
@@ -79,22 +61,17 @@ node *parse_sum(char **s)
             destroy_tree(lhs);
             return (NULL);
         }
-
-        // Creamos nodo padre ADD
         node tmp = {ADD, 0, lhs, rhs};
         lhs = new_node(tmp);
     }
     return (lhs);
 }
 
-/* --- Función Principal de Parseo --- */
+
 
 node    *parse_expr(char *s)
 {
-    node *ret = parse_sum(&s); // Iniciamos el análisis pasando la dirección del puntero
-
-    // Si al terminar el parseo la cadena NO ha llegado al final ('\0'), 
-    // significa que hay basura o sintaxis inválida (ej: "1+2)")
+    node *ret = parse_sum(&s);
     if (ret && *s) 
     {
         unexpected(*s);

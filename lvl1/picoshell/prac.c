@@ -21,15 +21,15 @@ int picoshell(char **cmds[])
             }
         }
         pid = fork();
-        if (pid == -1)
+        if(pid == -1)
         {
             dup2(tmp_fd, STDIN_FILENO);
             close(tmp_fd);
-            return 1;
+            return (1);
         }
-        if(pid == 0)
+        if (pid == 0)
         {
-            if(cmds[i + 1])
+            if (cmds[i + 1])
             {
                 close(fd[0]);
                 dup2(fd[1], STDOUT_FILENO);
@@ -41,7 +41,7 @@ int picoshell(char **cmds[])
         }
         else
         {
-            if(cmds[i + 1])
+            if (cmds[i + 1])
             {
                 close(fd[1]);
                 dup2(fd[0], STDIN_FILENO);
@@ -51,7 +51,7 @@ int picoshell(char **cmds[])
         }
     }
     while(wait(NULL) != -1);
-    dup2(tmp_fd, STDIN_FILENO);;
+    dup2(tmp_fd, STDIN_FILENO);
     close(tmp_fd);
     return 0;
 }

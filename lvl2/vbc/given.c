@@ -1,4 +1,5 @@
 #include "given.h"
+#include "vbc.h"
 
 node    *new_node(node n)
 {
